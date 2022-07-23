@@ -1,5 +1,6 @@
 .docker
-.env
+/.env
 .idea
 redis-data
 redis.conf
+vendor
