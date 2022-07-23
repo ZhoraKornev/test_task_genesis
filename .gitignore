@@ -1,0 +1,5 @@
+.docker
+.env
+.idea
+redis-data
+redis.conf

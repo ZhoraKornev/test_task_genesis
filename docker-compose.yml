@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+
+    # PHP service
+    app:
+#        image: "php:fpm-alpine3.15"
+        build: .
+        container_name: queue-php-cli
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        networks:
+            - app-network
+
+    redis:
+        image: "redis:alpine"
+        container_name: queue-redis
+        command: redis-server --requirepass q1w2e3r4
+        volumes:
+            - $PWD/redis-data:/var/lib/redis
+            - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+        networks:
+            - app-network
+
+
+networks:
+    app-network:
+        driver: bridge
