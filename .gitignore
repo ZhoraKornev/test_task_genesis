@@ -4,3 +4,4 @@
 redis-data
 redis.conf
 vendor
+docker-compose.override.yml

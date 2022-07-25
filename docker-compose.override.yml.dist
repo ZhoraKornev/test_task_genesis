@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+    # PHP service
+    app:
+        container_name: dev-queue-php-cli
+
+    redis:
+        container_name: dev-queue-redis

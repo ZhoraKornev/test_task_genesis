@@ -3,7 +3,6 @@ services:
 
     # PHP service
     app:
-#        image: "php:fpm-alpine3.15"
         build: .
         container_name: queue-php-cli
         working_dir: /var/www/
@@ -21,7 +20,6 @@ services:
             - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
         networks:
             - app-network
-
 
 networks:
     app-network:

@@ -1,10 +1,8 @@
 # Redis queue
-
+- CLI, який прийме повідомлення
+- Воркер, який виведе повідомлення в певний час
 
 ## Running the environment
-
-- Set the MySQL environment variables creating a `.env` file based on the `.env.example` file.
-
 - Build the app image with the following command:
 
 ```bash
