@@ -56,6 +56,11 @@ $queueDelay = (int)fgets(fopen("php://stdin", "r"));
 $id = $qr->sendMessage($queueTestName, $queueTextMessage, $queueDelay);
 echo "Send msg = $queueTextMessage in queue with name = $queueTestName  and delay = $queueDelay Message id = $id";echo PHP_EOL;
 
+
+
+
+
+//TODO rewrite this to Predis subscriber https://github.com/predis/predis/blob/v0.8/examples/PubSubContext.php
 $message = $qr->popMessage($queueTestName);
 $executor = new class() implements \App\ExecutorInterface {
     public function __invoke(\App\Queue\Message $message) : bool {
