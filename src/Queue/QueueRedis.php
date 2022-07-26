@@ -2,9 +2,9 @@
 
 namespace App\Queue;
 use App\Exceptions\MessageToLongException;
+use App\Exceptions\QueueAlreadyExistsException;
 use App\Exceptions\QueueNotFoundException;
 use App\Exceptions\RedisNotConnectedException;
-use Islambey\RSMQ\Exception;
 use JetBrains\PhpStorm\ArrayShape;
 
 class QueueRedis
@@ -52,9 +52,13 @@ class QueueRedis
 
 
     /**
-     * @throws Exception
+     * @param string $name
+     * @param int $vt
+     * @param int $delay
+     * @param int $maxSize
+     * @return bool
+     * @throws QueueAlreadyExistsException
      * @throws \App\Exceptions\QueueValidationException
-     * @throws \Exception
      */
     public function createQueue(string $name, int $vt = 30, int $delay = 0, int $maxSize = 65536): bool
     {
@@ -76,7 +80,7 @@ class QueueRedis
         $transaction->hSetNx($key, 'modified', $resp[0]);
         $resp = $transaction->exec();
         if (!$resp[0]) {
-            throw new \Exception('Queue already exists.');
+            throw new QueueAlreadyExistsException();
         }
 
         return (bool)$this->redisClient->getRedis()->sAdd("{$this->ns}QUEUES", $name);
@@ -90,10 +94,11 @@ class QueueRedis
         return $this->redisClient->listQueues("{$this->ns}QUEUES");
     }
 
+
     /**
      * @param string $name
      * @return void
-     * @throws Exception
+     * @throws QueueNotFoundException
      * @throws \App\Exceptions\QueueValidationException
      */
     public function deleteQueue(string $name): void
@@ -109,7 +114,7 @@ class QueueRedis
         $resp = $transaction->exec();
 
         if (!$resp[0]) {
-            throw new Exception('Queue not found.');
+            throw new QueueNotFoundException();
         }
     }
 
@@ -156,13 +161,13 @@ class QueueRedis
         );
     }
 
+
     /**
      * @param string $queue
      * @param int|null $vt
      * @param int|null $delay
      * @param int|null $maxSize
      * @return QueueAttributesModel
-     * @throws Exception
      * @throws QueueNotFoundException
      * @throws \App\Exceptions\QueueValidationException
      */
@@ -196,12 +201,12 @@ class QueueRedis
         return $this->getQueueAttributes($queue);
     }
 
+
     /**
      * @param string $queue
      * @param string $message
      * @param int|null $delay
      * @return string
-     * @throws Exception
      * @throws MessageToLongException
      * @throws \App\Exceptions\QueueValidationException
      */
@@ -242,6 +247,12 @@ class QueueRedis
         return $q['uid'];
     }
 
+    /**
+     * @param string $queue
+     * @param array $options
+     * @return Message|null
+     * @throws \App\Exceptions\QueueValidationException
+     */
     public function receiveMessage(string $queue, array $options = []): ?Message
     {
         $this->validator->validate([
@@ -316,11 +327,12 @@ class QueueRedis
         return $resp[0] === 1 && $resp[1] > 0;
     }
 
+
     /**
      * @param string $name
      * @param bool $uid
-     * @return mixed[]
-     * @throws Exception
+     * @return int[]
+     * @throws QueueNotFoundException
      * @throws \App\Exceptions\QueueValidationException
      */
     #[ArrayShape(['vt' => "int", 'delay' => "int", 'maxsize' => "int", 'ts' => "int", 'uid' => "string"])]
@@ -336,7 +348,7 @@ class QueueRedis
         $resp = $transaction->exec();
 
         if ($resp[0]['vt'] === false) {
-            throw new Exception('Queue not found.');
+            throw new QueueNotFoundException();
         }
 
         $ms = $this->valueHelper->formatZeroPad((int)$resp[1][1], 6);

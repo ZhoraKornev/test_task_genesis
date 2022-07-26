@@ -1,17 +1,11 @@
 <?php declare(strict_types=1);
 
+namespace App;
 
-namespace AndrewBreksa\RSMQ;
+use App\Queue\Message;
 
-/**
- * Interface ExecutorInterface
- *
- * @package AndrewBreksa\RSMQ
- * @author  Andrew Breksa <andrew@andrewbreksa.com>
- */
 interface ExecutorInterface
 {
-
     /**
      * Handle the message, retuning true will "ack" the message, false will not ack (causing the message to become
      * visible as per the queue's vt setting)
